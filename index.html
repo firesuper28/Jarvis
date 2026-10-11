@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#02070d">
+<title>J.A.R.V.I.S.</title>
+<style>
+:root{--c:#1b78c2;--c2:#4aa3e0;--g:rgba(27,120,194,.4);--tx:#e5fbff;--dim:#83aebb}
+body.s-online{--c:#2fd6ff;--c2:#c8fbff;--g:rgba(47,214,255,.4)}
+body.s-sleep{--c:#ff9b2f;--c2:#ffd09a;--g:rgba(255,155,47,.4)}
+body.s-lock{--c:#ff3b3b;--c2:#ffb0b0;--g:rgba(255,59,59,.45)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{color:var(--tx);font:15px/1.5 "Avenir Next","Helvetica Neue",Arial,sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:radial-gradient(ellipse at 50% 30%,rgba(0,112,180,.16),transparent 45%),linear-gradient(rgba(45,160,210,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(45,160,210,.035) 1px,transparent 1px),#02070d;background-size:auto,34px 34px,34px 34px,auto;background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.12) 4px)}
+.app{max-width:1400px;margin:auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--g);padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:12px;letter-spacing:.2em;font-weight:700}
+.brand i{width:38px;height:38px;border:1px solid var(--c);display:grid;place-items:center;font-style:normal;color:var(--c);text-shadow:0 0 12px var(--c);clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%)}
+.brand small{display:block;color:var(--dim);font-size:10px;letter-spacing:.25em;font-weight:400}
+.meta{display:flex;gap:18px;color:var(--dim);font-size:12px;letter-spacing:.12em;text-align:right}
+#st{color:var(--c)}
+#banner{display:none;margin-top:12px;background:rgba(255,59,59,.12);border:1px solid #ff3b3b;padding:10px 14px;gap:8px;align-items:center;flex-wrap:wrap}
+body.s-lock #banner{display:flex}
+.grid{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:14px;margin-top:14px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{position:relative;min-width:0;padding:15px;border:1px solid var(--g);background:linear-gradient(145deg,rgba(10,35,53,.8),rgba(3,13,23,.8))}
+.panel:before,.panel:after{content:"";position:absolute;width:16px;height:16px;pointer-events:none;transition:border-color .4s}
+.panel:before{left:-1px;top:-1px;border-left:2px solid var(--c);border-top:2px solid var(--c)}
+.panel:after{right:-1px;bottom:-1px;border-right:2px solid var(--c);border-bottom:2px solid var(--c)}
+h2{margin:0 0 12px;font-size:11px;letter-spacing:.22em;color:var(--c);display:flex;justify-content:space-between;font-weight:600}
+h2 span{color:var(--dim);font-size:10px;font-weight:400}
+.mt{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(131,174,187,.12);color:var(--dim)}
+.mt strong{color:var(--tx);font-weight:500;text-align:right}
+.core{display:flex;flex-direction:column;align-items:center}
+.reactor{width:min(62vw,270px);aspect-ratio:1;position:relative;display:grid;place-items:center;filter:drop-shadow(0 0 16px var(--g))}
+.reactor svg{width:100%;height:100%;overflow:visible}
+.s{stroke:var(--c);fill:none;transition:stroke .4s}.l{stroke:var(--c2);fill:none}.f{fill:var(--c);transition:fill .4s}.fl{fill:var(--c2)}
+.ring{transform-origin:160px 160px;animation:spin 24s linear infinite}.rev{animation-direction:reverse;animation-duration:17s}.fast{animation-duration:9s}
+.cg{transform-origin:160px 160px;animation:pulse 3s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{opacity:.6;transform:scale(.97)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.word{position:absolute;text-align:center;letter-spacing:.18em;text-shadow:0 0 16px var(--c);font-size:17px;font-weight:300}
+.word small{display:block;font-size:8px;letter-spacing:.3em;color:var(--c2)}
+.cap{color:var(--dim);font-size:11px;letter-spacing:.14em;margin:8px 0 12px;text-align:center}
+#log{height:240px;overflow-y:auto;padding:10px;background:rgba(1,8,14,.75);border:1px solid rgba(131,174,187,.15);font:13px/1.65 ui-monospace,Menlo,monospace;color:#b5d6e0;-webkit-overflow-scrolling:touch}
+.ln{white-space:pre-wrap;overflow-wrap:anywhere}.ln .d{color:#4e8498}.ln .t{color:var(--c)}.ln.e{color:#ff9a9a}
+form{display:flex;gap:8px;margin-top:10px}
+input{font:inherit;flex:1;min-width:0;color:var(--tx);background:rgba(2,13,22,.9);border:1px solid var(--g);padding:12px;border-radius:0}
+button{font:inherit;font-size:12px;letter-spacing:.1em;cursor:pointer;color:var(--c);background:rgba(11,49,71,.55);border:1px solid var(--c);padding:10px 12px;border-radius:0}
+button:hover{background:rgba(255,255,255,.08)}button:disabled{opacity:.35;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:2px solid var(--c2);outline-offset:1px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}.red{color:#ff9d9d;border-color:#ff5a5a}
+#mic.on{background:var(--c);color:#000}
+.tabs{display:flex;margin-bottom:10px}.tabs button{flex:1;border-color:var(--g);color:var(--dim)}.tabs button.a{color:var(--c);border-color:var(--c)}
+.pane{display:none;max-height:300px;overflow-y:auto}.pane.a{display:block}
+.row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px dashed var(--g);font-size:14px;overflow-wrap:anywhere}
+.row button{padding:0 9px;align-self:flex-start}
+.dim{color:var(--dim);font-size:13px}
+select{font:inherit;width:100%;color:var(--tx);background:rgba(2,13,22,.9);border:1px solid var(--g);padding:10px;border-radius:0}
+input[type=range]{width:100%;padding:0}
+label.dim{display:block;margin-top:10px}
+#dlg{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px}
+#dlg[hidden]{display:none}
+#dlg .box{width:min(380px,100%);display:flex;flex-direction:column;gap:10px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}.mid{order:-1}.meta span:last-child{display:none}}
+</style></head><body class="s-offline">
+<div class="app">
+<header class="top"><div class="brand"><i>J</i><div>J.A.R.V.I.S.<small>PERSONAL ASSISTANT</small></div></div><div class="meta"><span id="st"></span><span id="clk"></span></div></header>
+<div id="banner"><b style="color:#ff7b7b">TOTAL LOCKDOWN</b> Online access blocked. Unlock code:
+<input id="code" type="password" autocomplete="off" placeholder="Unlock code" style="flex:0 1 180px"><button id="unlock">UNLOCK</button><span id="uerr" class="dim"></span></div>
+<main class="grid">
+<aside class="col">
+<section class="panel"><h2>SYSTEM STATUS<span>REAL VALUES</span></h2><div id="stat"></div></section>
+<section class="panel"><h2>SECURITY<span>YOU CONTROL THIS</span></h2>
+<div class="btns"><button id="bOnline"></button><button id="bSleep"></button><button id="bLock" class="red">LOCKDOWN</button><button id="bCode">SET UNLOCK CODE</button></div></section>
+<section class="panel"><h2>GAMES AND FUN<span>ALL LOCAL</span></h2>
+<div class="btns"><button data-cmd="/joke">JOKE</button><button data-cmd="/guess">GUESS THE NUMBER</button><button data-cmd="/trivia">TRIVIA</button><button data-cmd="/flip">FLIP COIN</button><button data-cmd="/roll">ROLL DICE</button><button data-cmd="/fact science">SCIENCE FACT</button><button data-cmd="/fact maths">MATHS FACT</button><button data-cmd="/tutor">TUTOR ME</button></div>
+<p class="dim">Rock paper scissors: type /rps rock. Type quit to leave a game.</p></section>
+</aside>
+<div class="col mid">
+<section class="panel core"><h2 style="width:100%">ARC REACTOR<span id="rs"></span></h2>
+<div class="reactor"><svg viewBox="0 0 320 320" aria-hidden="true"><defs><filter id="gl"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<circle class="s" cx="160" cy="160" r="135" stroke-opacity=".35" stroke-dasharray="2 9"/>
+<g class="ring" filter="url(#gl)"><circle class="s" cx="160" cy="160" r="119" stroke-width="1.5" stroke-dasharray="62 12 7 12"/><circle class="s" cx="160" cy="160" r="103" stroke-width="2" stroke-dasharray="2 7"/>
+<path class="f" d="M160 29 L174 48 L160 43 L146 48Z M291 160 L272 174 L277 160 L272 146Z M160 291 L146 272 L160 277 L174 272Z M29 160 L48 146 L43 160 L48 174Z"/></g>
+<g class="ring rev"><circle class="s" cx="160" cy="160" r="88" stroke-width="7" stroke-dasharray="1 12"/><circle class="s" cx="160" cy="160" r="76" stroke-dasharray="32 7"/></g>
+<g class="ring fast"><path class="l" stroke-width="1.2" d="M160 54 L181 67 L195 88 L252 109 L265 137 L265 183 L252 211 L195 232 L181 253 L160 266 L139 253 L125 232 L68 211 L55 183 L55 137 L68 109 L125 88 L139 67Z"/></g>
+<g class="cg" filter="url(#gl)"><circle class="f" cx="160" cy="160" r="58" fill-opacity=".35"/><circle class="l" stroke-width="1.5" cx="160" cy="160" r="42"/><circle class="s" stroke-width="2" cx="160" cy="160" r="30" stroke-dasharray="5 5"/><circle class="fl" cx="160" cy="160" r="16" fill-opacity=".9"/></g>
+<g class="l" stroke-width="1" opacity=".8"><path d="M160 0V22M160 298V320M0 160H22M298 160H320"/></g></svg>
+<div class="word"><span id="word"></span><small>AI CORE</small></div></div>
+<div class="cap" id="cap"></div>
+<div class="btns"><button id="mic">MIC</button><button id="stop">STOP VOICE</button><button id="bVoice"></button></div></section>
+<section class="panel"><h2>COMMAND CONSOLE<span>LOCAL FIRST</span></h2><div id="log" aria-live="polite"></div>
+<form id="f"><input id="in" autocomplete="off" placeholder="Type a sum, a command, or /help"><button>SEND</button></form></section>
+</div>
+<aside class="col">
+<section class="panel"><h2>LOCAL DATA<span>STAYS ON THIS DEVICE</span></h2>
+<div class="tabs"><button data-p="mem" class="a">MEMORY</button><button data-p="notes">NOTES</button><button data-p="kb">KNOWLEDGE</button></div>
+<div class="pane a" id="mem"></div><div class="pane" id="notes"></div><div class="pane" id="kb"></div></section>
+<section class="panel"><h2>BACKUP<span>FILES APP</span></h2>
+<div class="btns"><button id="bExp">EXPORT</button><button id="bImp">IMPORT</button><input type="file" id="file" accept=".json,application/json" hidden></div>
+<p class="dim">Browser-only build: clearing site data deletes memories and can reset lockdown. Real lockdown enforcement needs the server (Phase 5). No AI server is connected yet.</p></section>
+<section class="panel"><h2>VOICE<span>THIS DEVICE'S VOICES</span></h2>
+<select id="vsel" aria-label="Voice"></select>
+<label class="dim" for="vrate">Speed</label><input type="range" id="vrate" min="0.6" max="1.4" step="0.05">
+<label class="dim" for="vpitch">Pitch</label><input type="range" id="vpitch" min="0.6" max="1.4" step="0.05">
+<div class="btns" style="margin-top:12px"><button id="vtest">TEST VOICE</button></div>
+<p class="dim" id="vnote"></p></section>
+</aside>
+</main></div>
+<div id="dlg" hidden><div class="panel box"><h2>SET UNLOCK CODE</h2><input id="d1" type="password" placeholder="Current code" autocomplete="off"><input id="d2" type="password" placeholder="New code (6+ characters)" autocomplete="off"><div class="btns"><button id="dok">SAVE</button><button id="dno">CANCEL</button></div><div id="derr" class="dim"></div></div></div>
+<script>
+(function(){
+"use strict";
+var KEY="jarvis_v2",store=null;
+try{localStorage.setItem("_t","1");localStorage.removeItem("_t");store=localStorage}catch(e){}
+var D={};try{D=JSON.parse(store.getItem(KEY))||JSON.parse(store.getItem("jarvis_v1"))||{}}catch(e){}
+var S=Object.assign({mode:"normal",online:false,mem:[],notes:[],kb:[],log:[],voice:false,vname:"",rate:1,pitch:1,salt:"",hash:""},D);
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function save(){if(store)try{store.setItem(KEY,JSON.stringify(S))}catch(e){say("Storage failed: "+e.message,"SYSTEM",1)}}
+function norm(s){return s.toLowerCase().replace(/[?.!]+$/,"").replace(/^(my|the)\s+/,"").trim()}
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+
+/* ---- security ---- */
+async function H(c,s){if(window.crypto&&crypto.subtle){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s+c));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")}var h=5381,t=s+c;for(var i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return "w"+h}
+function canOnline(){return S.mode==="normal"&&S.online}
+function setMode(m){if(S.mode==="lock")return false;S.mode=m;if(m!=="normal")S.online=false;save();render();return true}
+function setOnline(on){if(S.mode!=="normal")return say("Blocked: online AI can't be enabled in "+(S.mode==="lock"?"lockdown":"sleep mode")+".","SYSTEM",1);S.online=on;save();render();say(on?"Online AI enabled. No AI server is connected in this build, so nothing is sent.":"Online AI disabled.","SYSTEM")}
+$("bOnline").onclick=function(){setOnline(!S.online)};
+$("bSleep").onclick=function(){if(S.mode==="lock")return;if(S.mode==="sleep"){setMode("normal");say("Awake. Online AI stays off until you enable it.","SYSTEM")}else{setMode("sleep");say("Sleep mode. Online activity stopped.","SYSTEM")}};
+function lockdown(){if(!S.hash)return say("Set an unlock code first (Security panel), so lockdown can be reversed.","SYSTEM",1);setMode("lock");say("TOTAL LOCKDOWN. Online access blocked. Notes and memory kept.","SYSTEM",1)}
+$("bLock").onclick=lockdown;
+$("bCode").onclick=function(){if(S.mode==="lock")return;$("d1").style.display=S.hash?"":"none";$("d1").value=$("d2").value="";$("derr").textContent="";$("dlg").hidden=false;(S.hash?$("d1"):$("d2")).focus()};
+$("dno").onclick=function(){$("dlg").hidden=true};
+$("dok").onclick=async function(){
+ if(S.hash&&await H($("d1").value,S.salt)!==S.hash)return $("derr").textContent="Current code is wrong.";
+ if($("d2").value.length<6)return $("derr").textContent="New code needs 6+ characters.";
+ S.salt=Math.random().toString(36).slice(2)+Date.now();S.hash=await H($("d2").value,S.salt);save();$("dlg").hidden=true;say("Unlock code saved (stored as a salted hash, never as text).","SYSTEM")};
+var fails=0,until=0;
+$("unlock").onclick=async function(){
+ var w=Math.ceil((until-Date.now())/1000);if(w>0)return $("uerr").textContent="Wait "+w+"s.";
+ var v=$("code").value;$("code").value="";
+ if(v&&await H(v,S.salt)===S.hash){fails=0;S.mode="normal";S.online=false;save();$("uerr").textContent="";render();say("Lockdown lifted. Online AI is off.","SYSTEM")}
+ else{fails++;if(fails>=3)until=Date.now()+Math.min(60,fails*5)*1000;$("uerr").textContent="Wrong code."}};
+$("code").onkeydown=function(e){if(e.key==="Enter")$("unlock").onclick()};
+
+/* ---- render ---- */
+var sp=!!window.speechSynthesis,SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function row(k,v){return '<div class="mt"><span>'+k+'</span><strong>'+v+'</strong></div>'}
+function lst(a,t,f){return a.length?a.map(function(x,i){return '<div class="row"><span>'+f(x)+'</span><button data-t="'+t+'" data-i="'+i+'" aria-label="Delete">x</button></div>'}).join(""):'<p class="dim">Empty.</p>'}
+function render(){
+ var lk=S.mode==="lock",sl=S.mode==="sleep";
+ document.body.className=lk?"s-lock":sl?"s-sleep":S.online?"s-online":"s-offline";
+ var w=lk?"LOCKDOWN":sl?"SLEEP":S.online?"ONLINE AI":"OFFLINE";
+ $("word").textContent=w;$("rs").textContent=lk?"RED":sl?"ORANGE":S.online?"BRIGHT BLUE":"DARK BLUE";
+ $("cap").textContent=lk?"ALL ONLINE ACCESS BLOCKED":sl?"ONLINE OFF. LOCAL TOOLS AVAILABLE":S.online?"ONLINE AI ENABLED. NO SERVER CONNECTED":"LOCAL MODE. ONLINE AI DISABLED";
+ $("st").textContent="SYSTEM "+w;
+ $("stat").innerHTML=row("Mode",lk?"Lockdown":sl?"Sleep":"Normal")+row("Online AI",S.online?"Enabled":"Disabled")+row("Online access allowed",canOnline()?"Yes":"No")+row("Device network",navigator.onLine?"Connected":"Offline")+row("AI server","Not connected")+row("Memories",S.mem.length)+row("Notes",S.notes.length)+row("Knowledge facts",S.kb.length)+row("Storage",store?"Saving here":"Unavailable");
+ $("bOnline").textContent=S.online?"DISABLE ONLINE AI":"ENABLE ONLINE AI";$("bOnline").disabled=lk||sl;
+ $("bSleep").textContent=sl?"WAKE":"SLEEP MODE";$("bSleep").disabled=lk;$("bLock").disabled=lk;$("bCode").disabled=lk;
+ $("bVoice").textContent="SPOKEN REPLIES: "+(S.voice?"ON":"OFF");$("mic").disabled=!SR;
+ $("mem").innerHTML=lst(S.mem,"mem",function(m){return "<b>"+esc(m.k)+"</b><br>"+esc(m.v)});
+ $("notes").innerHTML=lst(S.notes,"notes",function(n){return esc(n.t)+'<br><span class="dim">'+esc(n.d)+"</span>"});
+ $("kb").innerHTML=lst(S.kb,"kb",function(k){return "<b>"+esc(k.t)+"</b><br>"+esc(k.f)+'<br><span class="dim">Source: '+esc(k.s)+"</span>"});
+ $("vnote").textContent="Speech output: "+(sp?"supported":"not supported")+". Speech input: "+(SR?"supported, but may send audio to Apple/Google, so it needs internet":"not supported here")+"."+(store?"":" Storage is unavailable: open JARVIS from a web address, not a local file.")}
+document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){document.querySelectorAll(".tabs button,.pane").forEach(function(x){x.classList.remove("a")});b.classList.add("a");$(b.dataset.p).classList.add("a")}});
+document.querySelector(".grid").onclick=function(e){var t=e.target.dataset.t;if(t){S[t].splice(e.target.dataset.i,1);save();render()}};
+window.addEventListener("online",render);window.addEventListener("offline",render);
+setInterval(function(){$("clk").textContent=new Date().toLocaleTimeString()},1000);
+
+/* ---- console ---- */
+function stamp(){return new Date().toTimeString().slice(0,8)}
+function line(m){var d=document.createElement("div");d.className="ln"+(m.e?" e":"");d.innerHTML='<span class="d">['+m.d+'] </span><span class="t">'+m.s+" // </span>"+esc(m.t);$("log").appendChild(d);$("log").scrollTop=1e9}
+function push(m){S.log.push(m);S.log=S.log.slice(-100);save();line(m)}
+function say(t,src,err,quiet){push({t:t,s:src||"LOCAL",e:err?1:0,d:stamp()});if(S.voice&&sp&&!quiet&&!err){talk(t)}}
+function calc(s){
+ var x=s.toLowerCase().replace(/^(calc|calculate)\s*/,"").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E").replace(/\b(sqrt|sin|cos|tan|log|abs)\b/g,function(f){return "Math."+f}).replace(/\bln\b/g,"Math.log");
+ var c=x.replace(/Math\.(PI|E|sqrt|sin|cos|tan|log|abs)/g,"");
+ if(!/^[\d\s+\-*\/().%,]+$/.test(c)||!/\d|Math/.test(x))return null;
+ try{var r=Function('"use strict";return ('+x+')')();return typeof r==="number"&&isFinite(r)?String(+r.toPrecision(12)):null}catch(e){return null}}
+function search(q){var k=q.toLowerCase(),out=[];
+ S.mem.forEach(function(m){if((m.k+" "+m.v).toLowerCase().indexOf(k)>-1)out.push("Memory: "+m.k+" = "+m.v)});
+ S.notes.forEach(function(n){if(n.t.toLowerCase().indexOf(k)>-1)out.push("Note: "+n.t)});
+ S.kb.forEach(function(f){if((f.t+" "+f.f).toLowerCase().indexOf(k)>-1)out.push("Knowledge: "+f.t+" = "+f.f+" (source: "+f.s+")")});
+ FX.forEach(function(f){if((f[2]+" "+f[3]).toLowerCase().indexOf(k)>-1)out.push("Built-in: "+f[2]+": "+f[3])});return out}
+/* ---- fun ---- */
+var G=null,jq=[];
+var JK=["Why do programmers prefer dark mode? Because light attracts bugs.","I'd tell you a UDP joke, but you might not get it.","There are 10 kinds of people: those who understand binary and those who don't.","Why was the computer cold? It left its Windows open.","My code has no bugs. It just develops surprise features.","What's a robot's favourite snack? Micro-chips.","Why don't scientists trust atoms? They make up everything.","I'd tell you a Wi-Fi joke, but it keeps dropping the punchline.","Why did the AI go to school? To improve its learning rate.","I ran a diagnostic on my sense of humour. Result: file not found."];
+var TR=[["What is the chemical symbol for gold?","au"],["How many planets are in our solar system?","8|eight"],["Which planet is called the Red Planet?","mars"],["What is 12 times 12?","144"],["Which billionaire built the first Iron Man suit?","tony stark|stark"],["Which gas do plants take in?","carbon dioxide|co2"],["How many sides does a hexagon have?","6|six"],["What is the largest ocean?","pacific"],["What is the capital of India?","new delhi|delhi"],["What is the fastest land animal?","cheetah"]];
+var LV=["","basic","intermediate","advanced"];
+var FX=[
+["s",1,"gravity","Gravity is the force that pulls objects with mass toward each other. Near Earth's surface it speeds up falling objects by about 9.8 m/s every second (ignoring air resistance)."],
+["s",1,"photosynthesis","Plants use light energy to turn carbon dioxide and water into glucose and oxygen, mostly inside chloroplasts."],
+["s",1,"water cycle","Water evaporates, condenses into clouds, falls as rain or snow, then flows back to rivers and oceans."],
+["s",1,"states of matter","Solid, liquid and gas are the everyday states of matter. Plasma, made of charged particles, is a fourth state found in stars and lightning."],
+["s",1,"speed of light","Light travels at about 299,792 km per second in a vacuum. Nothing with mass can reach that speed."],
+["s",1,"atom","An atom has a nucleus of protons and neutrons with electrons around it. The number of protons decides which element it is."],
+["s",1,"solar system","Eight planets orbit the Sun. Mercury is closest and Neptune is farthest."],
+["s",1,"dna","DNA is a double-helix molecule that carries the instructions for building and running living things."],
+["s",2,"newtons laws","1) An object keeps its motion unless a force acts on it. 2) Force = mass x acceleration (F = ma). 3) Every action has an equal and opposite reaction."],
+["s",2,"periodic table","Elements are arranged by atomic number (protons). Elements in the same column behave similarly. There are 118 confirmed elements."],
+["s",2,"mitochondria","Mitochondria release usable energy as ATP from glucose and oxygen, which is why they are called the powerhouse of the cell."],
+["s",2,"ph scale","pH runs from 0 to 14: 7 is neutral, below 7 is acidic, above 7 is basic. Each whole step is a tenfold change in hydrogen ion concentration."],
+["s",2,"ohms law","Voltage = current x resistance (V = I R). A 2 ohm resistor carrying 3 amps has 6 volts across it."],
+["s",2,"evolution","Natural selection: individuals with inherited traits that suit their environment tend to leave more offspring, so those traits spread over generations."],
+["s",2,"plate tectonics","Earth's crust is split into plates that move a few centimetres a year. Their collisions and slips cause earthquakes, volcanoes and mountains."],
+["s",2,"conservation of energy","Energy cannot be created or destroyed, only changed from one form to another, such as chemical to heat."],
+["s",3,"entropy","The second law of thermodynamics says the total entropy (disorder) of an isolated system never decreases. It is why heat flows from hot to cold and not the other way."],
+["s",3,"wave particle duality","Light and tiny particles like electrons show both wave-like and particle-like behaviour, depending on how they are measured."],
+["s",3,"special relativity","The speed of light is the same for all observers, and moving clocks run slower (time dilation). Mass and energy are linked by E = mc squared."],
+["s",3,"uncertainty principle","Heisenberg's uncertainty principle says you cannot know a particle's position and momentum both perfectly at once. It is a feature of nature, not a flaw in measuring tools."],
+["s",3,"crispr","CRISPR-Cas9 is a gene-editing tool adapted from a bacterial defence system. A guide RNA directs the Cas9 enzyme to cut DNA at a chosen spot."],
+["s",3,"black hole","A black hole is a region where gravity is so strong that, inside the event horizon, not even light can escape."],
+["s",3,"standard model","The Standard Model describes the known fundamental particles (quarks, leptons, force carriers and the Higgs boson) and three of the four forces. It does not include gravity."],
+["s",3,"expanding universe","Galaxies are moving apart as space itself expands. The universe is about 13.8 billion years old."],
+["m",1,"prime numbers","A prime number is greater than 1 and divisible only by 1 and itself. 2 is the only even prime."],
+["m",1,"pythagoras","In a right-angled triangle, a squared + b squared = c squared, where c is the longest side (hypotenuse). A 3-4-5 triangle works."],
+["m",1,"pi","Pi is the circumference of a circle divided by its diameter, about 3.14159. It is irrational: its decimals never end or repeat."],
+["m",1,"percentages","Percent means out of 100. 25% is the same as 1/4 or 0.25."],
+["m",1,"circle","Circumference = 2 x pi x r. Area = pi x r squared, where r is the radius."],
+["m",1,"order of operations","Work in this order: brackets, powers, then multiplication and division, then addition and subtraction (BODMAS or PEMDAS)."],
+["m",1,"mean median mode","Mean is the average, median is the middle value when sorted, and mode is the most common value."],
+["m",1,"zero","Zero is an even number. Dividing by zero is undefined."],
+["m",2,"quadratic formula","For ax squared + bx + c = 0, x = (-b plus or minus the square root of (b squared - 4ac)) / 2a."],
+["m",2,"logarithm","log base b of x is the power you raise b to in order to get x. For example, log base 10 of 1000 is 3."],
+["m",2,"derivative","A derivative is the instantaneous rate of change, or the slope of a curve at a point. The derivative of x squared is 2x."],
+["m",2,"integral","An integral gives the area under a curve. The fundamental theorem of calculus links integrals and derivatives as opposites."],
+["m",2,"probability","Probability runs from 0 (impossible) to 1 (certain). A fair die shows any given face with probability 1/6."],
+["m",2,"trigonometry","In a right triangle, sine = opposite / hypotenuse, cosine = adjacent / hypotenuse, tangent = opposite / adjacent. Also sin squared + cos squared = 1."],
+["m",2,"fibonacci","Each Fibonacci number is the sum of the two before it: 1, 1, 2, 3, 5, 8, 13. Ratios of neighbours approach the golden ratio, about 1.618."],
+["m",2,"exponential growth","Exponential growth multiplies by a constant factor each step, like doubling. It starts slowly and then gets very large very fast."],
+["m",3,"eulers identity","Euler's identity, e to the power of (i x pi) + 1 = 0, links five key constants: e, i, pi, 1 and 0."],
+["m",3,"complex numbers","Complex numbers have the form a + bi, where i squared = -1. They make every polynomial equation solvable."],
+["m",3,"eigenvectors","An eigenvector of a matrix keeps its direction when the matrix transforms it, and is only scaled by a number called the eigenvalue."],
+["m",3,"infinity","Cantor showed that some infinities are bigger than others: the real numbers cannot be listed one by one, so they outnumber the whole numbers."],
+["m",3,"prime number theorem","The number of primes up to n is roughly n divided by the natural log of n, and the estimate gets relatively better as n grows."],
+["m",3,"godels incompleteness","Godel's incompleteness theorems show that any consistent formal system powerful enough for arithmetic contains true statements it cannot prove."],
+["m",3,"fermats last theorem","No positive whole numbers a, b, c satisfy a to the n + b to the n = c to the n for n above 2. Andrew Wiles proved it in the 1990s."],
+["m",3,"riemann hypothesis","The Riemann hypothesis, still unproven, says the non-trivial zeros of the zeta function all lie on one vertical line. It is one of the Millennium Prize Problems."],
+["m",3,"taylor series","A Taylor series writes a function as an infinite sum built from its derivatives at one point. For example, e to the x = 1 + x + x squared/2! + x cubed/3! + ..."],
+["m",3,"central limit theorem","Averages of many independent samples tend to form a bell-shaped normal distribution, whatever the original distribution looks like."]];
+function fx(sb,lv){return pick(FX.filter(function(f){return(!sb||f[0]===sb)&&(!lv||f[1]===lv)}))}
+function fxs(f){return (f[0]==="s"?"Science":"Maths")+" ("+LV[f[1]]+"): "+f[2]+"\n"+f[3]}
+var STOP=["about","their","there","which","these","those","where","other","every","while","would","could","being","between","because","through","called","around","after","before","still","often","using","using","study","chosen","given","there","whole","things","number","numbers"];
+function kw(s){var o=[];s.toLowerCase().split(/\s+/).forEach(function(w){w=w.replace(/[^a-z]/g,"");if(w.length>=5&&STOP.indexOf(w)<0&&o.indexOf(w)<0)o.push(w)});return o}
+function tutorQ(){
+ var f=fx(G.sb,G.lv),k=kw(f[3]);G.f=f;G.keys=k;
+ var ck=k.filter(function(w){return new RegExp("\\b"+w+"\\b","i").test(f[3])});
+ if(G.n%2===0&&ck.length>1){var b=pick(ck);G.q="blank";G.ans=b;
+  return say("Question "+(G.n+1)+": fill the blank ("+(f[0]==="s"?"science":"maths")+", "+LV[f[1]]+", topic: "+f[2]+")\n"+f[3].replace(new RegExp("\\b"+b+"\\b","i"),"_____"),"TUTOR")}
+ G.q="explain";return say("Question "+(G.n+1)+": in your own words, what do you know about \""+f[2]+"\"? A sentence or a few key words is fine.","TUTOR")}
+function tutorA(t){
+ var l=t.toLowerCase().trim(),f=G.f;
+ if(/^(quit|stop|exit)$/.test(l)){var n=G.n,o=G.ok;G=null;return say("Tutor finished. Score: "+o+" out of "+n+". Come back any time.","TUTOR")}
+ if(l==="hint")return say(G.q==="blank"?"Hint: the word starts with \""+G.ans[0]+"\" and has "+G.ans.length+" letters.":"Hint: try mentioning "+G.keys.slice(0,2).join(" and ")+".","TUTOR");
+ if(l==="skip"){G.n++;say("Skipped. Here is the answer:\n"+fxs(f),"TUTOR");return tutorQ()}
+ if(G.q==="blank"){var ok=new RegExp("\\b"+G.ans+"s?\\b").test(l);if(ok)G.ok++;say(ok?"Correct!":"Not quite. The missing word was \""+G.ans+"\".\n\n"+fxs(f),"TUTOR")}
+ else{var hits=G.keys.filter(function(k){return l.indexOf(k.slice(0,5))>-1}),need=Math.max(1,Math.ceil(G.keys.length*.3));
+  if(hits.length>=need&&l.length>8){G.ok++;var miss=G.keys.filter(function(k){return hits.indexOf(k)<0}).slice(0,3);say("Good. You covered: "+hits.join(", ")+"."+(miss.length?" You could also mention: "+miss.join(", ")+".":"")+"\n\nFull version: "+f[3],"TUTOR")}
+  else say("That's missing the key ideas, so here is the correction:\n"+f[3],"TUTOR")}
+ G.n++;return tutorQ()}
+var HUH=["Hmm.","Even my arc reactor is stumped.","That one is beyond my local pay grade."];
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function joke(){if(!jq.length)jq=JK.slice().sort(function(){return Math.random()-.5});return jq.pop()}
+function play(t){
+ var l=t.toLowerCase().trim();
+ if(G.g==="tutor")return tutorA(t);
+ if(/^(quit|stop|exit)$/.test(l)){G=null;return say("Game ended. I'll pretend I let you win.","GAME")}
+ if(G.g==="guess"){var n=parseInt(l,10);if(isNaN(n))return say("Numbers only, or type quit.","GAME");G.n++;
+  if(n===G.v){var w=G.n;G=null;return say("Correct! Solved in "+w+" tries."+(w<=6?" Suspiciously good.":""),"GAME")}
+  return say((n<G.v?"Higher.":"Lower.")+" Tries: "+G.n,"GAME")}
+ var ok=G.a.split("|").indexOf(l)>-1,ans=G.a.split("|")[0];G=null;
+ say(ok?"Correct! Try another with /trivia.":"Not quite. The answer was "+ans+".","GAME")}
+document.querySelectorAll("[data-cmd]").forEach(function(b){b.onclick=function(){ask(b.dataset.cmd)}});
+function ask(text){
+ text=text.trim();if(!text)return;push({t:text,s:"YOU",d:stamp()});
+ var lc=text.toLowerCase(),a;
+ if(text[0]==="/")return cmd(text);
+ if(G)return play(text);
+ if(/^(quiz me|test me|tutor)\b/.test(lc))return cmd("/tutor "+lc);
+ var ff=lc.match(/^(?:tell me |give me )?(?:a |another |some )?(science |math |maths )?facts?\b/);if(ff)return cmd("/fact "+lc);
+ if(/^(tell me )?(a |another )?joke/.test(lc))return say(joke(),"HUMOUR");
+ if(/^(play|let'?s play|games?)\b/.test(lc))return say("Games: /guess, /trivia, /rps rock, /flip, /roll. Or tap the buttons.","GAME");
+ if(/^(thanks|thank you|thx)\b/.test(lc))return say(pick(["You're welcome. I run on free hosting, so gratitude is my only salary.","Anytime. Please keep the unlock code somewhere safer than a sticky note."]),"HUMOUR");
+ if(/^(who are you|what are you)\??$/.test(lc))return say("J.A.R.V.I.S., a personal assistant running in your browser on a budget of exactly zero rupees. I try not to take it personally.","HUMOUR");
+ if(/^how are you\b/.test(lc))return say(pick(["All systems nominal, mostly because there aren't many of them.","Running smoothly. No bugs detected, which makes me suspicious."]),"HUMOUR");
+ var c=calc(lc.replace(/^(what(?:'s| is))\s+/,""));if(c!==null)return say(text.replace(/^(what(?:'s| is)|calc|calculate)\s+/i,"")+" = "+c);
+ if((a=lc.match(/^(?:what(?:'s| is)|who is|where is|tell me)\s+(.+?)\??$/))){var k=norm(a[1]);
+  var h=S.mem.find(function(x){return norm(x.k)===k})||S.mem.find(function(x){return norm(x.k).indexOf(k)>-1});if(h)return say(h.k+": "+h.v,"LOCAL MEMORY")}
+ var kb=S.kb.find(function(f){return lc.indexOf(f.t.toLowerCase())>-1});if(kb)return say(kb.t+": "+kb.f+" (source: "+kb.s+")","LOCAL KNOWLEDGE");
+ if(/^(what(?:'s| is| are)|explain|define|describe|tell me about)\b/.test(lc)){var qq=lc.replace(/'/g,""),bf=FX.find(function(f){return new RegExp("\\b"+f[2]+"s?\\b").test(qq)});if(bf)return say(fxs(bf),"BUILT-IN FACTS")}
+ if(/\b(lockdown|sleep mode|unlock|enable online|disable online)\b/.test(lc))return say("Security changes only work through the Security panel or exact /commands, never plain sentences.","SYSTEM");
+ if(/^(what(?:'s| is) )?(the )?(time|date)\??$/.test(lc))return say(/time/.test(lc)?new Date().toLocaleTimeString():new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"}));
+ if(/^(hi|hello|hey|jarvis)\b/.test(lc))return say(pick(["At your service. Local tools are ready.","Hello. I was just running diagnostics on nothing in particular.","Present, powered and mildly sarcastic."]));
+ if(!canOnline())return say(pick(HUH)+" I don't have that saved locally, and online AI is "+(S.mode==="lock"?"blocked by lockdown":S.mode==="sleep"?"off in sleep mode":"disabled")+". Try /search or /help.","SYSTEM");
+ say("Online AI is switched on, but no AI server is connected in this build. Nothing was sent.","SYSTEM",1)}
+function cmd(t){
+ var p=t.split(/\s+/),c=p[0].toLowerCase(),r=t.slice(p[0].length).trim(),a,i;
+ if(c==="/tutor"){var l2=r.toLowerCase();G={g:"tutor",sb:/math/.test(l2)?"m":/sci/.test(l2)?"s":"",lv:/basic|easy/.test(l2)?1:/intermediate|medium/.test(l2)?2:/advanced|hard/.test(l2)?3:0,n:0,ok:0,q:null};
+  say("Tutor mode. I'll quiz you from my built-in facts and correct you. I check for key terms, not real understanding. Type hint, skip or quit any time.","TUTOR");return tutorQ()}
+ if(c==="/fact"){var l=r.toLowerCase(),sb=/math/.test(l)?"m":/sci/.test(l)?"s":"",lv=/basic|easy/.test(l)?1:/intermediate|medium/.test(l)?2:/advanced|hard/.test(l)?3:0;return say(fxs(fx(sb,lv)),"BUILT-IN FACTS")}
+ if(c==="/topics")return say("Science: "+FX.filter(function(f){return f[0]==="s"}).map(function(f){return f[2]}).join(", ")+"\n\nMaths: "+FX.filter(function(f){return f[0]==="m"}).map(function(f){return f[2]}).join(", "),"BUILT-IN FACTS");
+ if(c==="/joke")return say(joke(),"HUMOUR");
+ if(c==="/flip")return say(Math.random()<.5?"Heads.":"Tails.","GAME");
+ if(c==="/roll"){var s=Math.min(1000,Math.max(2,parseInt(r,10)||6));return say("Rolled a d"+s+": "+(1+Math.floor(Math.random()*s)),"GAME")}
+ if(c==="/rps"){var ch=["rock","paper","scissors"],u=r.toLowerCase();if(ch.indexOf(u)<0)return say("Format: /rps rock, /rps paper or /rps scissors","SYSTEM",1);var j=pick(ch);
+  return say("I chose "+j+". "+(u===j?"Draw.":((u==="rock"&&j==="scissors")||(u==="paper"&&j==="rock")||(u==="scissors"&&j==="paper"))?"You win.":"I win."),"GAME")}
+ if(c==="/guess"){G={g:"guess",v:1+Math.floor(Math.random()*100),n:0};return say("I'm thinking of a number from 1 to 100. Type your guess, or quit.","GAME")}
+ if(c==="/trivia"){var q=pick(TR);G={g:"trivia",a:q[1]};return say(q[0]+" (type your answer, or quit)","GAME")}
+ if(c==="/quit"){G=null;return say("Game ended.","GAME")}
+ if(c==="/help")return say("Tutor: /tutor [science|maths] [level], or say quiz me\nFacts: /fact [science|maths] [basic|intermediate|advanced], /topics, or ask: what is gravity\nFun: /joke /flip /roll /rps /guess /trivia /quit\n/learn offline key = value\n/memory  /forget key  /clear memory\n/note text  /notes\n/know topic = fact | source\n/search word\n/status  /sleep  /wake\n/online on|off  /lockdown\n/export\nMaths: 2+2*5, sqrt(81), 2^10");
+ if(c==="/learn"){a=r.replace(/^offline\s+/i,"").split("=");var v=a.slice(1).join("=").trim();if(a.length<2||!a[0].trim()||!v)return say("Format: /learn offline my favourite movie = Avengers Endgame","SYSTEM",1);
+  var k=a[0].trim(),ex=S.mem.find(function(x){return norm(x.k)===norm(k)});if(ex){ex.v=v}else S.mem.push({k:k,v:v,t:Date.now()});save();render();return say("Saved locally: "+k+" = "+v)}
+ if(c==="/memory")return say(S.mem.length?S.mem.map(function(m){return m.k+" = "+m.v}).join("\n"):"No memories saved.");
+ if(c==="/forget"){i=S.mem.findIndex(function(x){return norm(x.k)===norm(r)});if(i<0)return say('No memory named "'+r+'".',"SYSTEM",1);S.mem.splice(i,1);save();render();return say("Forgotten.")}
+ if(c==="/clear"&&/^memory/i.test(r)){if(S.mem.length&&confirm("Delete all "+S.mem.length+" memories?")){S.mem=[];save();render();return say("All memories deleted.")}return say("Nothing deleted.")}
+ if(c==="/note"){if(!r)return say("Format: /note your text","SYSTEM",1);S.notes.unshift({t:r,d:new Date().toLocaleString()});save();render();return say("Note saved.")}
+ if(c==="/notes")return say(S.notes.length?S.notes.map(function(n){return "- "+n.t}).join("\n"):"No notes.");
+ if(c==="/know"){a=r.split("=");var b=a.slice(1).join("=").split("|"),f=b[0].trim();if(a.length<2||!a[0].trim()||!f)return say("Format: /know topic = fact | source (source optional)","SYSTEM",1);
+  var tp=a[0].trim(),src=(b[1]||"entered by me").trim();if(S.kb.some(function(x){return x.t.toLowerCase()===tp.toLowerCase()&&x.f===f}))return say("Already saved.","SYSTEM");
+  S.kb.push({t:tp,f:f,s:src,d:new Date().toLocaleDateString()});save();render();return say("Added to local knowledge: "+tp)}
+ if(c==="/search"){if(!r)return say("Format: /search word","SYSTEM",1);var o=search(r);return say(o.length?o.join("\n"):"Nothing found locally for \""+r+"\".")}
+ if(c==="/status")return say("Mode: "+S.mode+"\nOnline AI: "+(S.online?"enabled":"disabled")+"\nOnline access allowed: "+(canOnline()?"yes":"no")+"\nMemories: "+S.mem.length+"  Notes: "+S.notes.length+"  Knowledge: "+S.kb.length,"SYSTEM");
+ if(c==="/sleep"){if(S.mode==="lock")return say("Blocked: lockdown is active.","SYSTEM",1);setMode("sleep");return say("Sleep mode.","SYSTEM")}
+ if(c==="/wake"){if(S.mode==="lock")return say("Blocked: lockdown is active.","SYSTEM",1);setMode("normal");return say("Awake. Online AI is off.","SYSTEM")}
+ if(c==="/online")return setOnline(/^on$/i.test(r));
+ if(c==="/lockdown")return lockdown();
+ if(c==="/export")return exp();
+ say("Unknown command. Type /help.","SYSTEM",1)}
+$("f").onsubmit=function(e){e.preventDefault();var v=$("in").value;$("in").value="";ask(v)};
+
+/* ---- backup ---- */
+function exp(){try{var b=new Blob([JSON.stringify({app:"jarvis",v:2,mem:S.mem,notes:S.notes,kb:S.kb},null,1)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="jarvis-backup.json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);say("Backup created. Look in Downloads in the Files app.","SYSTEM")}catch(e){say("Export failed: "+e.message,"SYSTEM",1)}}
+$("bExp").onclick=exp;$("bImp").onclick=function(){$("file").click()};
+$("file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();
+ r.onload=function(){try{var d=JSON.parse(r.result);if(d.app!=="jarvis"||!Array.isArray(d.mem))throw new Error("not a JARVIS backup");var n=0;
+  d.mem.forEach(function(m){if(m&&m.k&&m.v&&!S.mem.some(function(x){return norm(x.k)===norm(m.k)})){S.mem.push({k:String(m.k),v:String(m.v),t:m.t||Date.now()});n++}});
+  (d.notes||[]).forEach(function(x){if(x&&x.t&&!S.notes.some(function(y){return y.t===x.t})){S.notes.push({t:String(x.t),d:String(x.d||"")});n++}});
+  (d.kb||[]).forEach(function(x){if(x&&x.t&&x.f&&!S.kb.some(function(y){return y.t===x.t&&y.f===x.f})){S.kb.push({t:String(x.t),f:String(x.f),s:String(x.s||"imported"),d:String(x.d||"")});n++}});
+  save();render();say("Imported "+n+" new items. Existing ones were kept.","SYSTEM")}catch(e){say("Import failed: "+e.message,"SYSTEM",1)}};r.readAsText(f);this.value=""};
+
+/* ---- voice ---- */
+var vs=[];
+function loadV(){if(!sp)return;vs=speechSynthesis.getVoices().filter(function(v){return /^en/i.test(v.lang)});var o=$("vsel");
+ if(!vs.length){o.innerHTML="<option>No English voices found</option>";return}
+ o.innerHTML=vs.map(function(v){return '<option value="'+esc(v.name)+'">'+esc(v.name)+" ("+v.lang+")</option>"}).join("");
+ if(!vs.some(function(v){return v.name===S.vname})){var d=vs.find(function(v){return v.name==="Daniel"})||vs.find(function(v){return v.lang==="en-GB"})||vs[0];S.vname=d.name}
+ o.value=S.vname}
+function talk(t){if(!sp)return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t),v=vs.find(function(x){return x.name===S.vname});if(v){u.voice=v;u.lang=v.lang}u.rate=S.rate;u.pitch=S.pitch;speechSynthesis.speak(u)}
+if(sp){loadV();speechSynthesis.onvoiceschanged=loadV}
+$("vrate").value=S.rate;$("vpitch").value=S.pitch;
+$("vsel").onchange=function(){S.vname=this.value;save();talk("Voice changed. How do I sound?")};
+$("vrate").onchange=function(){S.rate=+this.value;save()};$("vpitch").onchange=function(){S.pitch=+this.value;save()};
+$("vtest").onclick=function(){if(!sp)return say("Speech output isn't supported in this browser.","SYSTEM",1);talk("At your service. This is how I sound.")};
+$("bVoice").onclick=function(){S.voice=!S.voice;if(!S.voice&&sp)speechSynthesis.cancel();save();render()};
+var rec=null;
+$("stop").onclick=function(){if(sp)speechSynthesis.cancel();if(rec)try{rec.stop()}catch(e){}};
+$("mic").onclick=function(){if(!SR)return;if(rec){try{rec.stop()}catch(e){}return}
+ rec=new SR();rec.lang="en-US";rec.interimResults=false;
+ rec.onstart=function(){$("mic").classList.add("on");$("mic").textContent="LISTENING"};
+ rec.onresult=function(e){ask(e.results[0][0].transcript)};
+ rec.onerror=function(e){say("Voice input failed: "+e.error+". It may need internet or microphone permission.","SYSTEM",1)};
+ rec.onend=function(){rec=null;$("mic").classList.remove("on");$("mic").textContent="MIC"};
+ try{rec.start()}catch(e){rec=null}};
+
+/* ---- start ---- */
+render();S.log.forEach(line);
+if(!S.log.length)say("Started offline. Online AI is disabled. Type /help.","SYSTEM",0,1);
+if(S.mode==="lock")say("Lockdown is still active. Enter your unlock code at the top.","SYSTEM",1,1);
+})();
+</script></body></html>
