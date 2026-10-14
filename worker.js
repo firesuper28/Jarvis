@@ -37,8 +37,10 @@ export default {
     const origin = request.headers.get("Origin");
     if (origin && origin !== url.origin) return json({ error: "Not allowed." }, 403);
 
-    // Access phrase check.
-    if (!env.JARVIS_KEY || request.headers.get("x-jarvis-key") !== env.JARVIS_KEY) {
+    // Access phrase check (spaces at the ends are ignored, since copy and paste often adds them).
+    const expected = String(env.JARVIS_KEY || "").trim();
+    if (!expected) return json({ error: "The access phrase isn't set up on the server yet." }, 500);
+    if ((request.headers.get("x-jarvis-key") || "").trim() !== expected) {
       return json({ error: "Not authorised." }, 401);
     }
     if (!env.GEMINI_API_KEY) {
