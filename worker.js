@@ -1,10 +1,20 @@
 // JARVIS Worker. Serves the website and answers POST /api/chat using Google Gemini.
-// Secrets (set in Cloudflare, never in this file):
+// Secret (set in Cloudflare, never in this file):
 //   GEMINI_API_KEY  your Gemini key
-//   JARVIS_KEY      an access phrase you choose, so strangers can't use your quota
 // Optional text variables:
 //   AI_ENABLED      set to "false" to switch online AI off at the server (a real lockdown)
 //   GEMINI_MODEL    model name to use (default below)
+
+// Best-effort limiter: slows down floods, but each Cloudflare location can run several copies, so it's a speed bump and not a guarantee.
+const hits = new Map();
+function limited(ip) {
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter((t) => now - t < 60000);
+  recent.push(now);
+  hits.set(ip, recent);
+  if (hits.size > 500) hits.clear();
+  return recent.length > 20;
+}
 
 const SYSTEM =
   "You are J.A.R.V.I.S., a friendly, witty personal assistant and tutor. " +
@@ -33,15 +43,13 @@ export default {
       return json({ error: "Online AI is switched off at the server." }, 503);
     }
 
-    // Only accept requests that come from this same site.
+    // Only accept requests that come from this same site (a speed bump against casual misuse, not real security).
     const origin = request.headers.get("Origin");
-    if (origin && origin !== url.origin) return json({ error: "Not allowed." }, 403);
+    if (origin !== url.origin) return json({ error: "Not allowed." }, 403);
 
-    // Access phrase check (spaces at the ends are ignored, since copy and paste often adds them).
-    const expected = String(env.JARVIS_KEY || "").trim();
-    if (!expected) return json({ error: "The access phrase isn't set up on the server yet." }, 500);
-    if ((request.headers.get("x-jarvis-key") || "").trim() !== expected) {
-      return json({ error: "Not authorised." }, 401);
+    // Slow down floods from a single address.
+    if (limited(request.headers.get("CF-Connecting-IP") || "unknown")) {
+      return json({ error: "Too many requests. Wait a minute and try again." }, 429);
     }
     if (!env.GEMINI_API_KEY) {
       return json({ error: "The Gemini key isn't set up in Cloudflare yet." }, 500);
